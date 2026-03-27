@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: sunum-web
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 300 --keep-alive 5
+    plan: starter          # ücretli plan (disk için)
+
+    # ── Kalıcı Disk ──────────────────────────────────────────
+    # sunum.html, sunum_assets/, .drive_cache/ ve .drive_manifest
+    # dosyalarının yeniden başlatmalarda kaybolmaması için.
+    disk:
+      name: sunum-data
+      mountPath: /data
+      sizeGB: 5            # ihtiyaca göre artırın
+
+    # ── Ortam Değişkenleri ───────────────────────────────────
+    envVars:
+      - key: DRIVE_FOLDER_ID
+        value: 1wl6IORLksewhrWqpCOfjFNgjlC_rAhZT   # kendi Folder ID'niz
+
+      - key: PROJE_ADI
+        value: Proje Sunumu
+
+      - key: PROJE_ALT_BASLIK
+        value: Google Drive Arşivi
+
+      - key: OUTPUT_FILE
+        value: /data/sunum.html          # kalıcı disk yoluna taşındı
+
+      - key: ASSETS_DIR
+        value: /data/sunum_assets        # kalıcı disk yoluna taşındı
+
+      # ⚠ Aşağıdaki değişkeni Render Dashboard'dan elle girin:
+      # Key  : GOOGLE_SERVICE_ACCOUNT_JSON
+      # Value: Service Account JSON dosyasının TAMAMI
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false                      # Dashboard'dan manuel girilecek
+
+      # Manuel yeniden üretim için opsiyonel güvenlik token'ı
+      - key: SECRET_REBUILD_TOKEN
+        generateValue: true              # Render otomatik oluşturur
